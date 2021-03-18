@@ -3,82 +3,83 @@ import java.util.Scanner;
 
 public class MusicPlayer {
 
+    static Scanner in = new Scanner(System.in);
+    static ArrayList<Song> songsList = new ArrayList<>();
+
     static class Song{
         String title, singer;
         int duration;
     }
 
-    static Scanner in = new Scanner(System.in);
-    static ArrayList<Song> songsList = new ArrayList<>();
-
-    static Thread AddSongThread = new Thread() {
-        public void run(){
+    static class AddSongThread extends Thread {
+        @Override public void run(){
             Song newSong = new Song();
-            System.out.println("Digite o nome da musica");
+            System.out.println("Digite o nome da música:");
             newSong.title = in.nextLine();
-            System.out.println("Digite o artista");
+            System.out.println("Digite o nome do artista:");
             newSong.singer = in.nextLine();
-            System.out.println("Digite a duracao em segundos");
-            newSong.duration = in.nextInt();
-            in.nextLine();
+            System.out.println("Digite a duração em segundos:");
+            newSong.duration = in.nextInt(); in.nextLine();
 
             songsList.add(newSong);
 
-            System.out.println("Voce adicionou a musico" + newSong.title);
+            System.out.println("Você adicionou a música: " + newSong.title);
         }
-    };
+    }
 
-    static Thread ListSongThread = new Thread() {
-        public void run(){
-            System.out.println("Idx.\tTitulo\tCantor\tDuracao");
+    static class ListSongThread extends Thread {
+        @Override public void run(){
+            System.out.println("Idx.\tTítulo\tCantor\tDuração");
             for (int i = 0; i < songsList.size(); ++i){
                 Song s = songsList.get(i);
                 System.out.printf("%d.\t%s\t%s\t%d\n", i + 1, s.title, s.singer, s.duration);
             }
         }
-    };
+    }
 
-    static Thread RemoveSongThread = new Thread() {
-        public void run(){
-            System.out.println("indice");
-            int idx = in.nextInt();
-            in.nextLine();
-            songsList.remove(idx);
+    static class RemoveSongThread extends Thread {
+        @Override public void run(){
+            System.out.println("Índice da música a ser deletada:");
+            int idx = in.nextInt(); in.nextLine();
+            songsList.remove(idx - 1);
         }
-    };
+    }
 
     static Thread UserInterfaceThread = new Thread() {
-        public void run(){
-            System.out.println("test");
-            String input = new String();
+        @Override public void run(){
+            System.out.println("Bem-Vindo");
+            String input;
 
             while (true){
                 input = in.nextLine();
                 
                 if (input.equals("add")){
-                    AddSongThread.start();
+                    AddSongThread addThread = new AddSongThread();
+                    addThread.start();
                     try {
-                        AddSongThread.join();
+                        addThread.join();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
 
                 } else if (input.equals("lst")){
-                    ListSongThread.start();
+                    ListSongThread listThread = new ListSongThread();
+                    listThread.start();
                     try {
-                        ListSongThread.join();
+                        listThread.join();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
 
                 } else if (input.equals("rmv")){
-                    RemoveSongThread.start();
+                    RemoveSongThread removeThread = new RemoveSongThread();
+                    removeThread.start();
                     try {
-                        RemoveSongThread.join();
+                        removeThread.join();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-    
+
                 } else if (input.equals("ext")){
                     System.exit(0);
                 } else {
