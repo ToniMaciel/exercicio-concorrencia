@@ -6,6 +6,14 @@ public class MusicPlayer {
     static Scanner in = new Scanner(System.in);
     static ArrayList<Song> songsList = new ArrayList<>();
 
+    /*
+    TODO
+    -Lidar com as exceções da remoção
+    -Comentar o código
+    -Deixar todos os prints iguais tanto em um sistema como no outro
+    -Incrementar a impressão de comandos
+    */
+
     static class Song{
         String title, singer;
         int duration;
@@ -29,10 +37,10 @@ public class MusicPlayer {
 
     static class ListSongThread extends Thread {
         @Override public void run(){
-            System.out.println("Idx.\tTítulo\tCantor\tDuração");
+            System.out.println("Idx. \tMúsica \tArtista \tDuração");
             for (int i = 0; i < songsList.size(); ++i){
                 Song s = songsList.get(i);
-                System.out.printf("%d.\t%s\t%s\t%d\n", i + 1, s.title, s.singer, s.duration);
+                System.out.printf("%d.\t %s\t %s\t %d\n", i + 1, s.title, s.singer, s.duration);
             }
         }
     }
