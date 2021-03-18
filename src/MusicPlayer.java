@@ -40,10 +40,10 @@ public class MusicPlayer {
     */
     static class ListSongThread extends Thread {
         @Override public void run(){
-            System.out.println("Idx.\tMúsica\tArtista\tDuração");
+            System.out.println("Idx. \t Música \t Artista \t Duração");
             for (int i = 0; i < songsList.size(); ++i){
                 Song s = songsList.get(i);
-                System.out.printf("%d.\t%s\t%s\t%d\n", i + 1, s.title, s.singer, s.duration);
+                System.out.printf("%d. \t %s \t %s \t %d\n", i + 1, s.title.replaceAll(" ", ""), s.singer.replaceAll(" ", ""), s.duration);
             }
         }
     }
