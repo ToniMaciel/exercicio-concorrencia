@@ -47,9 +47,22 @@ public class MusicPlayer {
 
     static class RemoveSongThread extends Thread {
         @Override public void run(){
-            System.out.println("Índice da música a ser deletada:");
-            int idx = in.nextInt(); in.nextLine();
-            songsList.remove(idx - 1);
+            System.out.println("Digite o índice da música que deseja remover:");
+
+            int i = 1;
+            for (Song song : songsList) {
+                System.out.println(i + ". " + song.title + " do artista " + song.singer);
+                i++;
+            }
+
+            int idx = in.nextInt() - 1; in.nextLine();
+
+            if(idx < 0 || idx > songsList.size() - 1)
+                System.out.println("Índice não encontrado, por favor use o comando rmv novamente para tentar excluir uma música");
+            else{
+                songsList.remove(idx);
+                System.out.println("Música removida com sucesso!");
+            }
         }
     }
 
