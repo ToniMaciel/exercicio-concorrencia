@@ -8,10 +8,10 @@ public class MusicPlayer {
 
     /*
     TODO
-    -Lidar com as exceções da remoção
     -Comentar o código
     -Deixar todos os prints iguais tanto em um sistema como no outro
     -Incrementar a impressão de comandos
+    -No outro sistema, usar mesmo esquema do remove daqui 
     */
 
     static class Song{
@@ -47,21 +47,25 @@ public class MusicPlayer {
 
     static class RemoveSongThread extends Thread {
         @Override public void run(){
-            System.out.println("Digite o índice da música que deseja remover:");
+            if(songsList.isEmpty()){
+                System.out.println("Parece que você não tem músicas para remover :/");
+            } else {
+                System.out.println("Digite o índice da música que deseja remover:");
 
-            int i = 1;
-            for (Song song : songsList) {
-                System.out.println(i + ". " + song.title + " do artista " + song.singer);
-                i++;
-            }
-
-            int idx = in.nextInt() - 1; in.nextLine();
-
-            if(idx < 0 || idx > songsList.size() - 1)
-                System.out.println("Índice não encontrado, por favor use o comando rmv novamente para tentar excluir uma música");
-            else{
-                songsList.remove(idx);
-                System.out.println("Música removida com sucesso!");
+                int i = 1;
+                for (Song song : songsList) {
+                    System.out.println(i + ". " + song.title + " do artista " + song.singer);
+                    i++;
+                }
+    
+                int idx = in.nextInt() - 1; in.nextLine();
+    
+                if(idx < 0 || idx > songsList.size() - 1)
+                    System.out.println("Esse índice não existe :( Por favor use o comando 'rmv' novamente caso deseje excluir uma música");
+                else{
+                    Song aux = songsList.remove(idx);
+                    System.out.println("A música " + aux.title + " foi removida com sucesso!");
+                }
             }
         }
     }
@@ -69,6 +73,7 @@ public class MusicPlayer {
     static Thread UserInterfaceThread = new Thread() {
         @Override public void run(){
             System.out.println("Bem-Vindo");
+            printCommands();
             String input;
 
             while (true){
@@ -101,12 +106,20 @@ public class MusicPlayer {
                         e.printStackTrace();
                     }
 
+                } else if (input.equals("help")){
+                    printCommands();
                 } else if (input.equals("ext")){
                     System.exit(0);
                 } else {
                     System.out.println("Comando invalido");
                 }
             }
+        }
+
+        private void printCommands() {
+            System.out.println("Digite o comando que você deseja:\n" + "add - Adicionar uma música\n" 
+            + "rmv - Remover uma música\n" + "lst - Listar as músicas que estão na lista\n" + 
+            "help - Mostrar comandos novamente\n" + "ext - Parar a execução");
         }
     };
 
