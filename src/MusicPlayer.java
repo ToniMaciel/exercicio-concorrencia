@@ -142,27 +142,27 @@ public class MusicPlayer {
     static Thread UserInterfaceThread = new Thread() {
         @Override public void run(){
             System.out.println("Bem-Vindo");
-            printCommands(); //Serve para printar os comandos que o sistema atende
+            printCommands();
             String input;
 
             while (true){ //Esse laço se repetirá até que o usuário indique que deseja sair do programa
-                input = in.nextLine(); //Pega cada novo comando
+                input = in.nextLine(); 
                 
                 if (input.equals("add")){
-                    System.out.println("Digite o nome da música:");  //Aqui será pedido para digitar as informações da música que deseja adicionar à lista
+                    System.out.println("Digite o nome da música:"); 
                     String title = in.nextLine();
                     System.out.println("Digite o nome do artista:");
                     String singer = in.nextLine();
                     System.out.println("Digite a duração em segundos:");
                     String duration = in.nextLine();
 
-                    AddSongThread addThread = new AddSongThread(title, singer, Integer.parseInt(duration)); //As informações digitas serão usadas aqui, no construtor da thread
+                    AddSongThread addThread = new AddSongThread(title, singer, Integer.parseInt(duration));
                     addThread.start();
                 } else if (input.equals("lst")){
                     ListSongThread listThread = new ListSongThread();
                     listThread.start();
                 } else if (input.equals("rmv")){
-                    if(songsList.isEmpty()){  //Checa se a lista de reprodução não está vazia
+                    if(songsList.isEmpty()){  
                         System.out.println("Parece que você não tem músicas para remover :/");
                     } else {
                         System.out.println("Digite o índice da música que deseja remover:");
@@ -175,10 +175,10 @@ public class MusicPlayer {
                         
                         int idx = in.nextInt(); in.nextLine(); //Pega o índice da música que o usuário deseja remover
             
-                        if(idx < 1 || idx > songsList.size()) //Checa se é válido
+                        if(idx < 1 || idx > songsList.size()) 
                             System.out.println("Esse índice não existe :( Por favor use o comando 'rmv' novamente caso deseje excluir uma música");
                         else{
-                            RemoveSongThread removeThread = new RemoveSongThread(idx-1); //Usa o índice como parâmetro no construtor da thread
+                            RemoveSongThread removeThread = new RemoveSongThread(idx-1);
                             removeThread.start();
                         }
                     }
