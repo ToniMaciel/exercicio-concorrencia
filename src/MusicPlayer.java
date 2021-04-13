@@ -144,47 +144,59 @@ public class MusicPlayer {
         printCommands();
         String input;
         while (true){ //Esse laço se repetirá até que o usuário indique que deseja sair do programa
-            input = in.nextLine(); 
-
-            if (input.equals("add")){
-                System.out.println("Digite o nome da música:"); 
-                String title = in.nextLine();
-                System.out.println("Digite o nome do artista:");
-                String singer = in.nextLine();
-                System.out.println("Digite a duração em segundos:");
-                String duration = in.nextLine();
-                AddSongThread addThread = new AddSongThread(title, singer, Integer.parseInt(duration));
-                addThread.start();
-            } else if (input.equals("lst")){
-                ListSongThread listThread = new ListSongThread();
-                listThread.start();
-            } else if (input.equals("rmv")){
-                if(songsList.isEmpty()){  
-                    System.out.println("Parece que você não tem músicas para remover :/");
-                } else {
-                    System.out.println("Digite o índice da música que deseja remover:");
-
-                    int i = 1; //Posição de cada música na lista de reprodução
-                    for (Song song : songsList) {
-                        System.out.println(i + ". " + song.title + " do artista " + song.singer);
-                        i++;
-                    }
-
-                    int idx = in.nextInt(); in.nextLine(); //Pega o índice da música que o usuário deseja remover
+            input = in.nextLine();
+            
+            switch (input) {
+                case "add":
+                    System.out.println("Digite o nome da música:"); 
+                    String title = in.nextLine();
+                    System.out.println("Digite o nome do artista:");
+                    String singer = in.nextLine();
+                    System.out.println("Digite a duração em segundos:");
+                    String duration = in.nextLine();
+                    AddSongThread addThread = new AddSongThread(title, singer, Integer.parseInt(duration));
+                    addThread.start();
+                    break;
                 
-                    if(idx < 1 || idx > songsList.size()) 
-                        System.out.println("Esse índice não existe :( Por favor use o comando 'rmv' novamente caso deseje excluir uma música");
-                    else{
-                        RemoveSongThread removeThread = new RemoveSongThread(idx-1);
-                        removeThread.start();
+                case "rmv":
+                    if(songsList.isEmpty()){  
+                        System.out.println("Parece que você não tem músicas para remover :/");
+                    } else {
+                        System.out.println("Digite o índice da música que deseja remover:");
+
+                        int i = 1; //Posição de cada música na lista de reprodução
+                        for (Song song : songsList) {
+                            System.out.println(i + ". " + song.title + " do artista " + song.singer);
+                            i++;
+                        }
+
+                        int idx = in.nextInt(); in.nextLine(); //Pega o índice da música que o usuário deseja remover
+                    
+                        if(idx < 1 || idx > songsList.size()) 
+                            System.out.println("Esse índice não existe :( Por favor use o comando 'rmv' novamente caso deseje excluir uma música");
+                        else{
+                            RemoveSongThread removeThread = new RemoveSongThread(idx-1);
+                            removeThread.start();
+                        }
                     }
-                }
-            } else if (input.equals("help")){
-                printCommands();
-            } else if (input.equals("ext")){
-                System.exit(0);
-            } else {
-                System.out.println("Comando inválido");
+                    break;              
+                
+                case "lst": 
+                    ListSongThread listThread = new ListSongThread();
+                    listThread.start();
+                    break;
+                
+                case "ext":
+                    System.exit(0);
+                    break;
+                
+                case "help":
+                    printCommands();
+                    break;
+
+                default:
+                    System.out.println("Comando inválido");
+                    break;
             }
         }
     }
