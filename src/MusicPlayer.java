@@ -139,70 +139,60 @@ public class MusicPlayer {
     * O comando 'ext' serve finalizar o sistema
     * Quaisquer outros comandos farão o programa emitir um aviso de comando inválido e buscarão um novo comando.
     */
-    static Thread UserInterfaceThread = new Thread() {
-        @Override public void run(){
-            System.out.println("Bem-Vindo");
-            printCommands();
-            String input;
+    public static void main(final String[] args) throws InterruptedException {
+        System.out.println("Bem-Vindo");
+        printCommands();
+        String input;
+        while (true){ //Esse laço se repetirá até que o usuário indique que deseja sair do programa
+            input = in.nextLine(); 
 
-            while (true){ //Esse laço se repetirá até que o usuário indique que deseja sair do programa
-                input = in.nextLine(); 
-                
-                if (input.equals("add")){
-                    System.out.println("Digite o nome da música:"); 
-                    String title = in.nextLine();
-                    System.out.println("Digite o nome do artista:");
-                    String singer = in.nextLine();
-                    System.out.println("Digite a duração em segundos:");
-                    String duration = in.nextLine();
-
-                    AddSongThread addThread = new AddSongThread(title, singer, Integer.parseInt(duration));
-                    addThread.start();
-                } else if (input.equals("lst")){
-                    ListSongThread listThread = new ListSongThread();
-                    listThread.start();
-                } else if (input.equals("rmv")){
-                    if(songsList.isEmpty()){  
-                        System.out.println("Parece que você não tem músicas para remover :/");
-                    } else {
-                        System.out.println("Digite o índice da música que deseja remover:");
-        
-                        int i = 1; //Posição de cada música na lista de reprodução
-                        for (Song song : songsList) {
-                            System.out.println(i + ". " + song.title + " do artista " + song.singer);
-                            i++;
-                        }
-                        
-                        int idx = in.nextInt(); in.nextLine(); //Pega o índice da música que o usuário deseja remover
-            
-                        if(idx < 1 || idx > songsList.size()) 
-                            System.out.println("Esse índice não existe :( Por favor use o comando 'rmv' novamente caso deseje excluir uma música");
-                        else{
-                            RemoveSongThread removeThread = new RemoveSongThread(idx-1);
-                            removeThread.start();
-                        }
-                    }
-                } else if (input.equals("help")){
-                    printCommands();
-                } else if (input.equals("ext")){
-                    System.exit(0);
+            if (input.equals("add")){
+                System.out.println("Digite o nome da música:"); 
+                String title = in.nextLine();
+                System.out.println("Digite o nome do artista:");
+                String singer = in.nextLine();
+                System.out.println("Digite a duração em segundos:");
+                String duration = in.nextLine();
+                AddSongThread addThread = new AddSongThread(title, singer, Integer.parseInt(duration));
+                addThread.start();
+            } else if (input.equals("lst")){
+                ListSongThread listThread = new ListSongThread();
+                listThread.start();
+            } else if (input.equals("rmv")){
+                if(songsList.isEmpty()){  
+                    System.out.println("Parece que você não tem músicas para remover :/");
                 } else {
-                    System.out.println("Comando inválido");
+                    System.out.println("Digite o índice da música que deseja remover:");
+
+                    int i = 1; //Posição de cada música na lista de reprodução
+                    for (Song song : songsList) {
+                        System.out.println(i + ". " + song.title + " do artista " + song.singer);
+                        i++;
+                    }
+
+                    int idx = in.nextInt(); in.nextLine(); //Pega o índice da música que o usuário deseja remover
+                
+                    if(idx < 1 || idx > songsList.size()) 
+                        System.out.println("Esse índice não existe :( Por favor use o comando 'rmv' novamente caso deseje excluir uma música");
+                    else{
+                        RemoveSongThread removeThread = new RemoveSongThread(idx-1);
+                        removeThread.start();
+                    }
                 }
+            } else if (input.equals("help")){
+                printCommands();
+            } else if (input.equals("ext")){
+                System.exit(0);
+            } else {
+                System.out.println("Comando inválido");
             }
         }
+    }
 
-        //Imprime uma lista com cada um dos comandos e sua função
-        private void printCommands() {
-            System.out.println("Digite o comando que você deseja:\n" + "add - Adicionar uma música\n" 
-            + "rmv - Remover uma música\n" + "lst - Listar as músicas que estão na lista\n" + 
-            "help - Mostrar comandos novamente\n" + "ext - Parar a execução");
-        }
-    };
-
-    //Roda a thread de interface com o usuário para inicializar o programa e só prossegue após sua finalização
-    public static void main(final String[] args) throws InterruptedException {
-        UserInterfaceThread.start();
-        UserInterfaceThread.join();
+    //Imprime uma lista com cada um dos comandos e sua função
+    private static void printCommands() {
+        System.out.println("Digite o comando que você deseja:\n" + "add - Adicionar uma música\n" 
+        + "rmv - Remover uma música\n" + "lst - Listar as músicas que estão na lista\n" + 
+        "help - Mostrar comandos novamente\n" + "ext - Parar a execução");
     }
 }
