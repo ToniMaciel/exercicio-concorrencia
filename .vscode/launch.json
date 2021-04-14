@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch GUIAula",
+            "request": "launch",
+            "mainClass": "GUIAula",
+            "projectName": "exercicio-concorrencia_30ea6fad"
+        },
+        {
+            "type": "java",
+            "name": "Launch GUI",
+            "request": "launch",
+            "mainClass": "GUI",
+            "projectName": "exercicio-concorrencia_30ea6fad"
+        }
+    ]
+}

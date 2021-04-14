@@ -16,6 +16,14 @@ public class MusicPlayer {
     static class Song{
         String title, singer;
         int duration;
+        
+        public Song(String string, String string2, int i) {
+            this.title = string;
+            this.singer = string2;
+            this.duration = i;
+        }
+        public Song() {
+        }
     }
 
     /*
