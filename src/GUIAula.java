@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,8 +16,11 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingWorker;
 import javax.swing.WindowConstants;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -49,9 +53,11 @@ public class GUIAula implements ActionListener, ListSelectionListener, WindowCon
 		musicProgressBar = new JProgressBar();
 		musicProgressBar.setStringPainted(true);
 		musicProgressBar.setValue(0);
-		musicProgressBar.setSize(100, 25);
+		musicProgressBar.setBounds(20, 20, 420, 25);
 
 		playingSong = new JLabel("None");
+		playingSong.setBounds(20, 45, 420, 25);
+
 		
 		//Variáveis de teste-----------
 		title.add("teste - Teste");
@@ -66,50 +72,54 @@ public class GUIAula implements ActionListener, ListSelectionListener, WindowCon
 		musicTitlesList = new JList(title.toArray());
 		musicTitlesList.setSelectedIndex(0);
 		musicTitlesList.addListSelectionListener(this);
-		musicTitlesList.setAutoscrolls(true);
+		
+		JScrollPane scrollPane = new JScrollPane(musicTitlesList);
+		scrollPane.setViewportView(musicTitlesList);
+		scrollPane.setBounds(20, 150, 420, 110);
 
 		bckMusicButton = new JButton("<<");
 		bckMusicButton.addActionListener(this);
 		bckMusicButton.setActionCommand("bck");
+		bckMusicButton.setBounds(20, 90, 60, 40);
 		
 		stpMusicButton = new JButton("|>");
 		stpMusicButton.addActionListener(this);
 		stpMusicButton.setActionCommand("stp");
+		stpMusicButton.setBounds(85, 90, 50, 40);
 
 		fwdMusicButton = new JButton(">>");
 		fwdMusicButton.addActionListener(this);
 		fwdMusicButton.setActionCommand("fwd");
+		fwdMusicButton.setBounds(140, 90, 60, 40);
 
 		addMusicButton = new JButton("ADD");
 		addMusicButton.addActionListener(this);
 		addMusicButton.setActionCommand("add");
+		addMusicButton.setBounds(380, 90, 60, 40);
 
 		rmvMusicButton = new JButton("RMV");
 		rmvMusicButton.addActionListener(this);
 		rmvMusicButton.setActionCommand("rmv");
-
-		JPanel songFunc = new JPanel();
-		songFunc.setLayout(new GridLayout(1, 0));
-		songFunc.add(bckMusicButton);
-		songFunc.add(stpMusicButton);
-		songFunc.add(fwdMusicButton);
+		rmvMusicButton.setBounds(380, 270, 60, 40);
 
 
 		JPanel panel = new JPanel();
-		panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 10, 30));
-		panel.setLayout(new GridLayout(0, 1));
+		//panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 10, 30));
+		panel.setLayout(null);
 
 		panel.add(musicProgressBar);
 		panel.add(playingSong);
-		panel.add(musicTitlesList);
-		panel.add(songFunc);
+		panel.add(bckMusicButton);
+		panel.add(stpMusicButton);
+		panel.add(fwdMusicButton);
 		panel.add(addMusicButton);
+		panel.add(scrollPane);
 		panel.add(rmvMusicButton);
 
 		frame = new JFrame();
 		frame.add(panel);
-		frame.setTitle("GUI Aula");
-		frame.setSize(300, 500);
+		frame.setTitle("MusicPlayer");
+		frame.setSize(480, 360);
 		frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		frame.setVisible(true);
 	}
@@ -149,7 +159,6 @@ public class GUIAula implements ActionListener, ListSelectionListener, WindowCon
 					} catch (InterruptedException e1) {}
 				}
 
-				musicProgressBar.setValue(0);
 				return 0;
 			}
 
@@ -162,7 +171,6 @@ public class GUIAula implements ActionListener, ListSelectionListener, WindowCon
 	public void actionPerformed(ActionEvent e) {
 		String command = e.getActionCommand();
 
-		// Caso a ação "deposit_act" seja detecada no clique de algum botão.
 		switch (command) {
 			case "add":
 				String name   = JOptionPane.showInputDialog(frame, "Title");
@@ -221,11 +229,7 @@ public class GUIAula implements ActionListener, ListSelectionListener, WindowCon
 
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-		/*
-		 * Aqui criamos uma função, que é acionada todas as vezes que uma nova célula
-		 * da lista é clicada. Quando isso acontece, o valor da célula é capturado,
-		 * convertido e colocado em nossa variável handleDepositValue.
-		 */
+
 		String selectedOption = (String) musicTitlesList.getSelectedValue();
 		int tempIdx = title.indexOf(selectedOption);
 
