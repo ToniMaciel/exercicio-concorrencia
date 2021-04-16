@@ -18,11 +18,16 @@ import javax.swing.event.ListSelectionListener;
 
 public class GUIMusicPlayer implements ActionListener, ListSelectionListener, WindowConstants {
 
+	//	idx guarda o valor do indice na lista da música que está em execução e progBarIdx guarda o valor que a musicProgressBar possui
 	int idx, progBarIdx = 0;
+	//	Variável auxiliar na definição de tempo de música
 	long songTime = 0;
+	//	Variável auxiliar de controle de botão pause/play (JBUtton stpMusicButton)
 	boolean paused = true;
 	
+	//	Lista que possui strings que definem o nome da música e o artista
 	ArrayList<String>  title = new ArrayList<>();
+	//	Lista que possui as durações das músicas de mesmo indice na lista anterior
 	ArrayList<Integer> duration = new ArrayList<>();
 
 	//	Inicializa os componentes do JavaSwing
@@ -71,16 +76,6 @@ public class GUIMusicPlayer implements ActionListener, ListSelectionListener, Wi
 		addMusicButton.addActionListener(this);
 		addMusicButton.setActionCommand("add");
 		addMusicButton.setBounds(380, 100, 60, 40);
-		
-		//Variáveis de teste-----------
-		title.add("teste - Teste");
-		title.add("teste1 - Teste1");
-		title.add("teste2 - Teste2");
-
-		duration.add(25);
-		duration.add(25);
-		duration.add(25);
-		//------------------------------
 
 		musicTitlesList = new JList<Object>(title.toArray());
 		musicTitlesList.addListSelectionListener(this);
@@ -128,21 +123,24 @@ public class GUIMusicPlayer implements ActionListener, ListSelectionListener, Wi
 				String musicName     = JOptionPane.showInputDialog(frame, "Title", "Music Input", -1);
 				String musicArtist   = JOptionPane.showInputDialog(frame, "Artist", "Music Input", -1);
 				String musicDuration = JOptionPane.showInputDialog(frame, "Duration (in seconds)", "Music Input", -1);
+				
 				title.add(musicName + " - " + musicArtist);
 				duration.add(Integer.parseInt(musicDuration));
+				
+				//	Atualiza lista das músicas
 				musicTitlesList.setListData(title.toArray());
 				break;
 			case "rmv":
-				if(thereIsMusicSelected()){
+				if(thereIsMusicSelected()){ //	Só executa se alguma música da lista estiver selecionada
 					title.remove(idx);
 					duration.remove(idx);
 					musicTitlesList.setListData(title.toArray());
 
 					idx = Math.min(idx, title.size() - 1);
 
-					if (!title.isEmpty())
+					if (!title.isEmpty()) //	Se ainda houver músicas na lista, seleciona uma música da lista para ser executada
 						selectNewMusic();
-					else {
+					else { //	Caso contrário, cancela a thread que atualiza a progressBar
 						if (!progressBarUpdate.isDone())
 							progressBarUpdate.cancel(true);
 
@@ -153,13 +151,13 @@ public class GUIMusicPlayer implements ActionListener, ListSelectionListener, Wi
 					}
 				}
 				break;
-			case "fwd":
+			case "fwd": //	Executa próxima música de forma circular
 				if(thereIsMusicSelected()){
 					idx = (idx + 1) % title.size();
 					selectNewMusic();
 				}
 				break;
-			case "bck":
+			case "bck": // Executa música anterior de forma circular
 				if(thereIsMusicSelected()){
 					idx = (idx + title.size() - 1) % title.size();
 					selectNewMusic();
@@ -170,11 +168,11 @@ public class GUIMusicPlayer implements ActionListener, ListSelectionListener, Wi
 
 				if (paused){
 					stpMusicButton.setText("|>");
-					progressBarUpdate.cancel(true);
+					progressBarUpdate.cancel(true); //Cancela a thread que estava executando a musica selecionada no momento
 				}
 				else{
 					stpMusicButton.setText("||");
-					if (thereIsMusicSelected())
+					if (thereIsMusicSelected()) //Só dá paly em uma música, se houver alguma selecionada
 						callProgBar();
 				}
 				break;
@@ -184,7 +182,7 @@ public class GUIMusicPlayer implements ActionListener, ListSelectionListener, Wi
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
 
-		if(thereIsMusicSelected()){
+		if(thereIsMusicSelected()){ //Verifica se o valor trocado é uma música da lista (Pode ser null caso remova a primeira música da lista, pois idx fica -1)
 			String selectedOption = (String) musicTitlesList.getSelectedValue();
 			idx = title.indexOf(selectedOption);
 
@@ -193,6 +191,31 @@ public class GUIMusicPlayer implements ActionListener, ListSelectionListener, Wi
 
 	}
 
+	private boolean thereIsMusicSelected() {
+		return musicTitlesList.getSelectedValue() != null;
+	}
+
+	private void selectNewMusic() {
+		musicTitlesList.setSelectedIndex(idx);
+	}
+
+	/**
+	 * 	Seta as variavéis necessárias para inicialização da música selecionada, como reinicialização do tempo de execução e da progressBar
+	 * 	bem como altera o botão de play/pause, a label que indica a música atual e o tempo total para sua execução.
+	 * 	Por último, chama a thread que vai executar a música.
+	 */
+	private void startNewMusic() {
+		paused = false;
+		songTime = 0;
+		progBarIdx = 0;
+		musicProgressBar.setValue(0);
+		stpMusicButton.setText("||");
+		playingSong.setText("Now Playing: " + title.get(idx));
+		totalTime.setText(timeToString(duration.get(idx)));
+		callProgBar();
+	}
+
+	//	Thread resposável por executar a música, alterando a progressBar e o tempo atual de execução da música
 	private void callProgBar() {
 
 		if (!progressBarUpdate.isDone())
@@ -206,7 +229,6 @@ public class GUIMusicPlayer implements ActionListener, ListSelectionListener, Wi
 					musicProgressBar.setValue(progBarIdx);
 
 					long now = System.currentTimeMillis();
-					System.out.println(now);
 					while (System.currentTimeMillis() < now + 10 * duration.get(idx))
 						currentTime.setText(timeToString((int)(System.currentTimeMillis() + songTime - now)/1000));
 					
@@ -223,25 +245,6 @@ public class GUIMusicPlayer implements ActionListener, ListSelectionListener, Wi
 
 	private String timeToString(int time){
 		return String.format("%d:%02d", time/60, time%60);
-	}
-
-	private void selectNewMusic() {
-		musicTitlesList.setSelectedIndex(idx);
-	}
-
-	private boolean thereIsMusicSelected() {
-		return musicTitlesList.getSelectedValue() != null;
-	}
-
-	private void startNewMusic() {
-		paused = false;
-		songTime = 0;
-		progBarIdx = 0;
-		musicProgressBar.setValue(0);
-		stpMusicButton.setText("||");
-		playingSong.setText("Now Playing: " +title.get(idx));
-		totalTime.setText(timeToString(duration.get(idx)));
-		callProgBar();
 	}
 
 }
