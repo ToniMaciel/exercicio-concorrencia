@@ -16,63 +16,47 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-public class GUIAula implements ActionListener, ListSelectionListener, WindowConstants {
+public class GUIMusicPlayer implements ActionListener, ListSelectionListener, WindowConstants {
 
 	int idx, progBarIdx = 0;
+	long songTime = 0;
 	boolean paused = true;
+	
 	ArrayList<String>  title = new ArrayList<>();
 	ArrayList<Integer> duration = new ArrayList<>();
 
 	//	Inicializa os componentes do JavaSwing
 	private JButton addMusicButton, fwdMusicButton, stpMusicButton, bckMusicButton, rmvMusicButton;
 	private JLabel playingSong, currentTime, totalTime;
-	private JList musicTitlesList;
+	private JList<Object> musicTitlesList;
 	private JProgressBar musicProgressBar;
-	private SwingWorker ProgressBarUpdate = new SwingWorker(){
+	private JFrame frame;
+	private SwingWorker<Object, Object> progressBarUpdate = new SwingWorker<Object, Object>(){
 		@Override
 		protected Object doInBackground() throws Exception {
 			return null;
 		}
 	};
-	long songTime = 0;
-	JFrame frame;
 
-	public GUIAula() {
+	public GUIMusicPlayer() {
 
 		musicProgressBar = new JProgressBar();
 		musicProgressBar.setValue(0);
 		musicProgressBar.setBounds(20, 20, 420, 20);
 
-		playingSong = new JLabel("None");
-		playingSong.setBounds(20, 60, 420, 25);
 		currentTime = new JLabel("0:00");
 		currentTime.setBounds(20, 45, 40, 10);
 		totalTime = new JLabel("0:00");
 		totalTime.setBounds(410, 45, 40, 10);
 
-		
-		//Variáveis de teste-----------
-		/*title.add("teste - Teste");
-		title.add("teste1 - Teste1");
-		title.add("teste2 - Teste2");
-
-		duration.add(25);
-		duration.add(25);
-		duration.add(25);*/
-		//------------------------------
-
-		musicTitlesList = new JList(title.toArray());
-		musicTitlesList.addListSelectionListener(this);
-		
-		JScrollPane scrollPane = new JScrollPane(musicTitlesList);
-		scrollPane.setViewportView(musicTitlesList);
-		scrollPane.setBounds(20, 150, 420, 110);
+		playingSong = new JLabel("Now Playing: None");
+		playingSong.setBounds(20, 60, 420, 25);
 
 		bckMusicButton = new JButton("<<");
 		bckMusicButton.addActionListener(this);
 		bckMusicButton.setActionCommand("bck");
 		bckMusicButton.setBounds(20, 100, 60, 40);
-		
+
 		stpMusicButton = new JButton("|>");
 		stpMusicButton.addActionListener(this);
 		stpMusicButton.setActionCommand("stp");
@@ -87,21 +71,35 @@ public class GUIAula implements ActionListener, ListSelectionListener, WindowCon
 		addMusicButton.addActionListener(this);
 		addMusicButton.setActionCommand("add");
 		addMusicButton.setBounds(380, 100, 60, 40);
+		
+		//Variáveis de teste-----------
+		title.add("teste - Teste");
+		title.add("teste1 - Teste1");
+		title.add("teste2 - Teste2");
+
+		duration.add(25);
+		duration.add(25);
+		duration.add(25);
+		//------------------------------
+
+		musicTitlesList = new JList<Object>(title.toArray());
+		musicTitlesList.addListSelectionListener(this);
+		
+		JScrollPane scrollPane = new JScrollPane(musicTitlesList);
+		scrollPane.setViewportView(musicTitlesList);
+		scrollPane.setBounds(20, 150, 420, 110);
 
 		rmvMusicButton = new JButton("RMV");
 		rmvMusicButton.addActionListener(this);
 		rmvMusicButton.setActionCommand("rmv");
 		rmvMusicButton.setBounds(380, 270, 60, 40);
 
-
 		JPanel panel = new JPanel();
-		//panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 10, 30));
 		panel.setLayout(null);
-
 		panel.add(musicProgressBar);
-		panel.add(playingSong);
 		panel.add(currentTime);
 		panel.add(totalTime);
+		panel.add(playingSong);
 		panel.add(bckMusicButton);
 		panel.add(stpMusicButton);
 		panel.add(fwdMusicButton);
@@ -118,19 +116,89 @@ public class GUIAula implements ActionListener, ListSelectionListener, WindowCon
 	}
 
 	public static void main(String[] args) {
-		new GUIAula();
+		new GUIMusicPlayer();
 	}
 
-	private String timeToString(int time){
-		return String.format("%d:%02d", time/60, time%60);
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		String command = e.getActionCommand();
+
+		switch (command) {
+			case "add":
+				String musicName     = JOptionPane.showInputDialog(frame, "Title", "Music Input", -1);
+				String musicArtist   = JOptionPane.showInputDialog(frame, "Artist", "Music Input", -1);
+				String musicDuration = JOptionPane.showInputDialog(frame, "Duration (in seconds)", "Music Input", -1);
+				title.add(musicName + " - " + musicArtist);
+				duration.add(Integer.parseInt(musicDuration));
+				musicTitlesList.setListData(title.toArray());
+				break;
+			case "rmv":
+				if(thereIsMusicSelected()){
+					title.remove(idx);
+					duration.remove(idx);
+					musicTitlesList.setListData(title.toArray());
+
+					idx = Math.min(idx, title.size() - 1);
+
+					if (!title.isEmpty())
+						selectNewMusic();
+					else {
+						if (!progressBarUpdate.isDone())
+							progressBarUpdate.cancel(true);
+
+						totalTime.setText("0:00");
+						currentTime.setText("0:00");
+						playingSong.setText("Now Playing: None");
+						musicProgressBar.setValue(0);
+					}
+				}
+				break;
+			case "fwd":
+				if(thereIsMusicSelected()){
+					idx = (idx + 1) % title.size();
+					selectNewMusic();
+				}
+				break;
+			case "bck":
+				if(thereIsMusicSelected()){
+					idx = (idx + title.size() - 1) % title.size();
+					selectNewMusic();
+				}
+				break;
+			case "stp":
+				paused = !paused;
+
+				if (paused){
+					stpMusicButton.setText("|>");
+					progressBarUpdate.cancel(true);
+				}
+				else{
+					stpMusicButton.setText("||");
+					if (thereIsMusicSelected())
+						callProgBar();
+				}
+				break;
+		}
+	}
+
+	@Override
+	public void valueChanged(ListSelectionEvent e) {
+
+		if(thereIsMusicSelected()){
+			String selectedOption = (String) musicTitlesList.getSelectedValue();
+			idx = title.indexOf(selectedOption);
+
+			startNewMusic();
+		}
+
 	}
 
 	private void callProgBar() {
 
-		if (!ProgressBarUpdate.isDone())
-			ProgressBarUpdate.cancel(true);
+		if (!progressBarUpdate.isDone())
+			progressBarUpdate.cancel(true);
 
-		ProgressBarUpdate = new SwingWorker() {
+		progressBarUpdate = new SwingWorker<Object, Object>() {
 
 			@Override
 			protected Object doInBackground() throws Exception {
@@ -138,6 +206,7 @@ public class GUIAula implements ActionListener, ListSelectionListener, WindowCon
 					musicProgressBar.setValue(progBarIdx);
 
 					long now = System.currentTimeMillis();
+					System.out.println(now);
 					while (System.currentTimeMillis() < now + 10 * duration.get(idx))
 						currentTime.setText(timeToString((int)(System.currentTimeMillis() + songTime - now)/1000));
 					
@@ -149,92 +218,30 @@ public class GUIAula implements ActionListener, ListSelectionListener, WindowCon
 			}
 
 		};
-		ProgressBarUpdate.execute();
+		progressBarUpdate.execute();
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		String command = e.getActionCommand();
-
-		switch (command) {
-			case "add":
-				String name   = JOptionPane.showInputDialog(frame, "Title");
-				String singer = JOptionPane.showInputDialog(frame, "Singer");
-				String dur    = JOptionPane.showInputDialog(frame, "Duration");
-				title.add(name + " - " + singer);
-				duration.add(Integer.parseInt(dur));
-				musicTitlesList.setListData(title.toArray());
-				break;
-			case "rmv":
-				if(musicTitlesList.getSelectedValue() != null){
-					title.remove(idx);
-					duration.remove(idx);
-					musicTitlesList.setListData(title.toArray());
-
-					idx = Math.min(idx, title.size() - 1);
-
-					if (idx != -1)
-						musicTitlesList.setSelectedIndex(idx);
-					else {
-						if (!ProgressBarUpdate.isDone())
-							ProgressBarUpdate.cancel(true);
-
-						totalTime.setText("0:00");
-						currentTime.setText("0:00");
-						playingSong.setText("None");
-						musicProgressBar.setValue(0);
-					}
-				}
-				break;
-			case "fwd":
-				if(musicTitlesList.getSelectedValue() != null){
-					idx = (idx + 1) % title.size();
-					musicTitlesList.setSelectedIndex(idx);
-					playingSong.setText(title.get(idx));
-				}
-				break;
-			case "bck":
-				if(musicTitlesList.getSelectedValue() != null){
-					idx = (idx + title.size() - 1) % title.size();
-					playingSong.setText(title.get(idx));
-					musicTitlesList.setSelectedIndex(idx);
-				}
-				break;
-			case "stp":
-				paused = !paused;
-
-				if (paused){
-					stpMusicButton.setText("|>");
-					ProgressBarUpdate.cancel(true);
-				}
-				else{
-					stpMusicButton.setText("||");
-					if (musicTitlesList.getSelectedValue() != null)
-						callProgBar();
-				}
-				break;
-		}
+	private String timeToString(int time){
+		return String.format("%d:%02d", time/60, time%60);
 	}
 
-	@Override
-	public void valueChanged(ListSelectionEvent e) {
+	private void selectNewMusic() {
+		musicTitlesList.setSelectedIndex(idx);
+	}
 
-		String selectedOption = (String) musicTitlesList.getSelectedValue();
-		int tempIdx = title.indexOf(selectedOption);
+	private boolean thereIsMusicSelected() {
+		return musicTitlesList.getSelectedValue() != null;
+	}
 
-		if (tempIdx != -1){
-			idx = tempIdx;
-			paused = false;
-			songTime = 0;
-			progBarIdx = 0;
-			musicProgressBar.setValue(0);
-			stpMusicButton.setText("||");
-			playingSong.setText(title.get(idx));
-			totalTime.setText(timeToString(duration.get(idx)));
-			callProgBar();
-		}
-		System.out.println(idx);
-
+	private void startNewMusic() {
+		paused = false;
+		songTime = 0;
+		progBarIdx = 0;
+		musicProgressBar.setValue(0);
+		stpMusicButton.setText("||");
+		playingSong.setText("Now Playing: " +title.get(idx));
+		totalTime.setText(timeToString(duration.get(idx)));
+		callProgBar();
 	}
 
 }
