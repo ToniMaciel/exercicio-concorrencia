@@ -166,33 +166,39 @@ public class GUIAula implements ActionListener, ListSelectionListener, WindowCon
 				musicTitlesList.setListData(title.toArray());
 				break;
 			case "rmv":
-				title.remove(idx);
-				duration.remove(idx);
-				musicTitlesList.setListData(title.toArray());
+				if(musicTitlesList.getSelectedValue() != null){
+					title.remove(idx);
+					duration.remove(idx);
+					musicTitlesList.setListData(title.toArray());
 
-				idx = Math.min(idx, title.size() - 1);
-				
-				if (idx != -1)
-					musicTitlesList.setSelectedIndex(idx);
-				else {
-					if (!ProgressBarUpdate.isDone())
-						ProgressBarUpdate.cancel(true);
+					idx = Math.min(idx, title.size() - 1);
 
-					totalTime.setText("0:00");
-					currentTime.setText("0:00");
-					playingSong.setText("None");
-					musicProgressBar.setValue(0);
+					if (idx != -1)
+						musicTitlesList.setSelectedIndex(idx);
+					else {
+						if (!ProgressBarUpdate.isDone())
+							ProgressBarUpdate.cancel(true);
+
+						totalTime.setText("0:00");
+						currentTime.setText("0:00");
+						playingSong.setText("None");
+						musicProgressBar.setValue(0);
+					}
 				}
 				break;
 			case "fwd":
-				idx = (idx + 1) % title.size();
-				musicTitlesList.setSelectedIndex(idx);
-				playingSong.setText(title.get(idx));
+				if(musicTitlesList.getSelectedValue() != null){
+					idx = (idx + 1) % title.size();
+					musicTitlesList.setSelectedIndex(idx);
+					playingSong.setText(title.get(idx));
+				}
 				break;
 			case "bck":
-				idx = (idx + title.size() - 1) % title.size();
-				playingSong.setText(title.get(idx));
-				musicTitlesList.setSelectedIndex(idx);
+				if(musicTitlesList.getSelectedValue() != null){
+					idx = (idx + title.size() - 1) % title.size();
+					playingSong.setText(title.get(idx));
+					musicTitlesList.setSelectedIndex(idx);
+				}
 				break;
 			case "stp":
 				paused = !paused;
