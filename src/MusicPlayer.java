@@ -5,6 +5,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.DefaultListModel;
 
+import java.util.Collections;
+import java.util.List;
+
 public class MusicPlayer {
     
     public Lock lock = new ReentrantLock(); //Lock que será usado na região critica (lista das músicas)
@@ -12,6 +15,9 @@ public class MusicPlayer {
     public boolean songsListInUse = false; //Para saber se alguma thread está fazendo alguma operação com a lista de reprodução
     public DefaultListModel<String> songsList = new DefaultListModel<>(); // Lista que possui strings que definem o nome da música e o artista
     public ArrayList<Integer> duration = new ArrayList<>(); //	Lista que possui as durações das músicas de mesmo indice na lista anterior
+    public List<Integer> indexOrder = new ArrayList<>();
+    public boolean random = false;
+    private int idxp = 0;
 
     /*
     * Essa é a classe usada para adicionar uma música à lista de reprodução.
@@ -42,6 +48,8 @@ public class MusicPlayer {
 
                 songsList.addElement(this.musicName);
                 duration.add(this.musicDuration);
+
+                indexOrder.add(songsList.size() - 1);
                 
                 songsListInUse = false;
                 songslistOperation.signalAll();
@@ -72,7 +80,6 @@ public class MusicPlayer {
 
                 for (int i = 0; i < songsList.size(); ++i)
                     System.out.println(songsList.get(i));
-                
                 
                 songsListInUse = false;
                 songslistOperation.signalAll();
@@ -122,6 +129,48 @@ public class MusicPlayer {
         }
     }
 
+    class ShuffleSongThread extends Thread {
+
+        @Override public void run() {
+            int idx = indexOrder.get(idxp);
+
+            try {
+                lock.lock();
+
+                while(songsListInUse){
+                    songslistOperation.await();
+                }
+                
+                songsListInUse = true;
+
+                random ^= true;
+                if (random)
+                    Collections.shuffle(indexOrder);
+                else {
+                    indexOrder.clear();
+                    for (int i = 0; i < songsList.size(); ++i)
+                        indexOrder.add(i);
+                }
+
+                System.out.println(indexOrder);
+
+                songsListInUse = false;
+                songslistOperation.signalAll();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            finally {
+                lock.unlock();
+            }
+
+            getIndex(true, idx);
+        }
+    }
+
+    public void randomMusicThread(){
+        new ShuffleSongThread().start();
+    }
+
     public void addThread(String title, int duration){
         new AddSongThread(title, duration).start();
     }
@@ -130,4 +179,30 @@ public class MusicPlayer {
         new RemoveSongThread(index).start();
     }
 
+    public int getIndex(boolean force, int update) {
+        try {
+            lock.lock();
+
+            while(songsListInUse){
+                songslistOperation.await();
+            }
+            
+            songsListInUse = true;
+
+            if (force)
+                idxp = indexOrder.indexOf(update);
+            else 
+                idxp = (idxp + indexOrder.size() + update) % indexOrder.size();
+
+            songsListInUse = false;
+            songslistOperation.signalAll();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        finally {
+            lock.unlock();
+        }
+
+        return indexOrder.get(idxp);
+    }
 }

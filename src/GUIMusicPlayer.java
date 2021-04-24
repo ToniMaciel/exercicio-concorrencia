@@ -26,7 +26,7 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 	
 
 	//	Inicializa os componentes do JavaSwing
-	private JButton addMusicButton, fwdMusicButton, stpMusicButton, bckMusicButton, rmvMusicButton;
+	private JButton addMusicButton, fwdMusicButton, stpMusicButton, bckMusicButton, rmvMusicButton, shuMusicButton;
 	private JLabel playingSong, currentTime, totalTime;
 	private JList musicTitlesList;
 	private JProgressBar musicProgressBar;
@@ -80,6 +80,11 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 		scrollPane.setViewportView(musicTitlesList);
 		scrollPane.setBounds(20, 150, 420, 110);
 
+		shuMusicButton = new JButton("Shuffle");
+		shuMusicButton.addActionListener(this);
+		shuMusicButton.setActionCommand("shu");
+		shuMusicButton.setBounds(20, 270, 100, 40);
+
 		rmvMusicButton = new JButton("RMV");
 		rmvMusicButton.addActionListener(this);
 		rmvMusicButton.setActionCommand("rmv");
@@ -96,6 +101,7 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 		panel.add(fwdMusicButton);
 		panel.add(addMusicButton);
 		panel.add(scrollPane);
+		panel.add(shuMusicButton);
 		panel.add(rmvMusicButton);
 
 		frame = new JFrame();
@@ -145,13 +151,13 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 				break;
 			case "fwd": //	Executa próxima música de forma circular
 				if(thereIsMusicSelected()){
-					idx = (idx + 1) % songsList.size();
+					idx = getIndex(false, 1);
 					selectNewMusic();
 				}
 				break;
 			case "bck": // Executa música anterior de forma circular
 				if(thereIsMusicSelected()){
-					idx = (idx + songsList.size() - 1) % songsList.size();
+					idx = getIndex(false, -1);
 					selectNewMusic();
 				}
 				break;
@@ -168,6 +174,11 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 						callProgBar();
 				}
 				break;
+			case "shu":
+				if (thereIsMusicSelected()){
+					randomMusicThread();
+				}
+			break;
 		}
 	}
 
@@ -176,6 +187,7 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 
 		if(thereIsMusicSelected()){ //Verifica se o valor trocado é uma música da lista (Pode ser null caso remova a primeira música da lista, pois idx fica -1)
 			idx = musicTitlesList.getSelectedIndex();
+			getIndex(true, idx);
 
 			startNewMusic();
 		}
@@ -227,6 +239,11 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 					
 					songTime += 10 * duration.get(idx);
 					progBarIdx++;
+				}
+
+				if (!isCancelled()){
+					idx = getIndex(false, 1);
+					selectNewMusic();
 				}
 
 				return 0;
