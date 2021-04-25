@@ -72,32 +72,6 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 		addMusicButton.setActionCommand("add");
 		addMusicButton.setBounds(380, 100, 60, 25);
 
-		//-------------------------------------
-			songsList.addElement("01-01");
-			songsList.addElement("02-01");
-			songsList.addElement("03-01");
-			songsList.addElement("04-01");
-			songsList.addElement("05-01");
-
-			songsListAux.add("01-01");
-			songsListAux.add("02-01");
-			songsListAux.add("03-01");
-			songsListAux.add("04-01");
-			songsListAux.add("05-01");
-
-			duration.add(15);
-			duration.add(20);
-			duration.add(25);
-			duration.add(30);
-			duration.add(35);
-
-			durationAux.add(15);
-			durationAux.add(20);
-			durationAux.add(25);
-			durationAux.add(30);
-			durationAux.add(35);
-		//-------------------------------------
-
 		musicTitlesList = new JList();
 		musicTitlesList.setModel(songsList);
 		musicTitlesList.addListSelectionListener(this);
