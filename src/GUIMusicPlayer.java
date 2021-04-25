@@ -22,11 +22,11 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 	//	Variável auxiliar na definição de tempo de música
 	long songTime = 0;
 	//	Variável auxiliar de controle de botão pause/play (JBUtton stpMusicButton)
-	boolean paused = true;
+	boolean paused = true, shuffle = false;
 	
 
 	//	Inicializa os componentes do JavaSwing
-	private JButton addMusicButton, fwdMusicButton, stpMusicButton, bckMusicButton, rmvMusicButton;
+	private JButton addMusicButton, fwdMusicButton, stpMusicButton, bckMusicButton, rmvMusicButton, shuMusicButton, seqMusicButton;
 	private JLabel playingSong, currentTime, totalTime;
 	private JList musicTitlesList;
 	private JProgressBar musicProgressBar;
@@ -79,11 +79,23 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 			songsList.addElement("04-01");
 			songsList.addElement("05-01");
 
+			songsListAux.add("01-01");
+			songsListAux.add("02-01");
+			songsListAux.add("03-01");
+			songsListAux.add("04-01");
+			songsListAux.add("05-01");
+
 			duration.add(15);
-			duration.add(15);
-			duration.add(15);
-			duration.add(15);
-			duration.add(15);
+			duration.add(20);
+			duration.add(25);
+			duration.add(30);
+			duration.add(35);
+
+			durationAux.add(15);
+			durationAux.add(20);
+			durationAux.add(25);
+			durationAux.add(30);
+			durationAux.add(35);
 		//-------------------------------------
 
 		musicTitlesList = new JList();
@@ -93,6 +105,16 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 		JScrollPane scrollPane = new JScrollPane(musicTitlesList);
 		scrollPane.setViewportView(musicTitlesList);
 		scrollPane.setBounds(20, 150, 420, 110);
+
+		shuMusicButton = new JButton("Shuffle");
+		shuMusicButton.addActionListener(this);
+		shuMusicButton.setActionCommand("shu");
+		shuMusicButton.setBounds(20, 270, 75, 40);
+
+		seqMusicButton = new JButton("Serial");
+		seqMusicButton.addActionListener(this);
+		seqMusicButton.setActionCommand("ser");
+		seqMusicButton.setBounds(100, 270, 75, 40);
 
 		rmvMusicButton = new JButton("RMV");
 		rmvMusicButton.addActionListener(this);
@@ -110,6 +132,8 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 		panel.add(fwdMusicButton);
 		panel.add(addMusicButton);
 		panel.add(scrollPane);
+		panel.add(shuMusicButton);
+		panel.add(seqMusicButton);
 		panel.add(rmvMusicButton);
 
 		frame = new JFrame();
@@ -192,17 +216,63 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 						callProgBar();
 				}
 				break;
+			case "shu":
+				if(songsList.size() > 0){
+					/*if(!thereIsMusicSelected())
+						shuffleTread(-1);
+					else
+						shuffleTread(idx);	*/
+						
+					String aux = (String)musicTitlesList.getSelectedValue();
+					progressBarUpdate.cancel(true);
+					shuffleTread();
+					try {
+						Thread.sleep(5);
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
+					}
+					shuffle = true;
+					idx = songsList.indexOf(aux);
+					musicTitlesList.setSelectedIndex(idx);
+					shuffle = false;
+
+
+				}	
+				break;
+			case "ser":
+				if(songsList.size() > 0){				
+					String aux = (String)musicTitlesList.getSelectedValue();
+					progressBarUpdate.cancel(true);
+					sequentialTread();
+					try {
+						Thread.sleep(5);
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
+					}
+					shuffle = true;
+					idx = songsList.indexOf(aux);
+					musicTitlesList.setSelectedIndex(idx);
+					shuffle = false;
+				}
+				
+				break;
 		}
 	}
 
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
 
-		if(thereIsMusicSelected()){ //Verifica se o valor trocado é uma música da lista (Pode ser null caso remova a primeira música da lista, pois idx fica -1)
-			idx = musicTitlesList.getSelectedIndex();
-
-			startNewMusic();
+		if(shuffle){
+			if(!paused)
+				callProgBar();
+		} else {
+			if(thereIsMusicSelected()){ //Verifica se o valor trocado é uma música da lista (Pode ser null caso remova a primeira música da lista, pois idx fica -1)
+				idx = musicTitlesList.getSelectedIndex();
+	
+				startNewMusic();
+			}	
 		}
+
 
 	}
 
