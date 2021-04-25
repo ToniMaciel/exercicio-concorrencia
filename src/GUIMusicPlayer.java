@@ -26,7 +26,7 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 	
 
 	//	Inicializa os componentes do JavaSwing
-	private JButton addMusicButton, fwdMusicButton, stpMusicButton, bckMusicButton, rmvMusicButton, shuMusicButton, seqMusicButton;
+	private JButton addMusicButton, fwdMusicButton, stpMusicButton, bckMusicButton, rmvMusicButton, shuMusicButton, seqMusicButton, loopMusicButton;
 	private JLabel playingSong, currentTime, totalTime, looping;
 	private JList musicTitlesList;
 	private JProgressBar musicProgressBar;
@@ -119,6 +119,11 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 		seqMusicButton.setActionCommand("ser");
 		seqMusicButton.setBounds(100, 265, 75, 25);
 
+		loopMusicButton = new JButton("Loop");
+		loopMusicButton.addActionListener(this);
+		loopMusicButton.setActionCommand("loop");
+		loopMusicButton.setBounds(180, 265, 75, 25);
+
 		rmvMusicButton = new JButton("RMV");
 		rmvMusicButton.addActionListener(this);
 		rmvMusicButton.setActionCommand("rmv");
@@ -138,6 +143,7 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 		panel.add(looping);
 		panel.add(shuMusicButton);
 		panel.add(seqMusicButton);
+		panel.add(loopMusicButton);
 		panel.add(rmvMusicButton);
 
 		frame = new JFrame();
@@ -260,6 +266,15 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 				}
 				
 				break;
+			case "loop":
+				loop = !loop;
+
+				if (loop) 
+					looping.setText("Looping: Enable");
+				else 
+					looping.setText("Looping: Disable");
+				
+				break;
 		}
 	}
 
@@ -328,16 +343,21 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 				}
 
 				if(!isCancelled()){
-					if(idx < songsList.getSize() - 1){
-						idx++;
+					if(loop){
+						idx = (idx + 1) % songsList.size();
 						selectNewMusic();
-					} else {
-						musicTitlesList.clearSelection();
-						totalTime.setText("0:00");
-						currentTime.setText("0:00");
-						playingSong.setText("Now Playing: None");
-						musicProgressBar.setValue(0);
-						stpMusicButton.setText("|>");
+					} else{
+						if(idx < songsList.getSize() - 1){
+							idx++;
+							selectNewMusic();
+						} else {
+							musicTitlesList.clearSelection();
+							totalTime.setText("0:00");
+							currentTime.setText("0:00");
+							playingSong.setText("Now Playing: None");
+							musicProgressBar.setValue(0);
+							stpMusicButton.setText("|>");
+						}
 					}
 				}
 
