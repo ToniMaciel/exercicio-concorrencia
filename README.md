@@ -8,4 +8,8 @@ Ao adicionar as músicas que você deseja, é possível executá-las selecionand
 
 Com o botão "RMV" é possível excluir a música que está em execução.
 
-Ao término de uma música, a execução ficará parada até que seja selecionada uma nova música. A reprodução sequencial ou aleatória será feita na próxima entrega.
+Com o botão "Shuffle" é possível embaralhar a lista de músicas em execução de forma aleatória, já com o botão "Serial" a lista voltará a ordem de sua inserção.
+
+O botão "Loop" faz com que a execução das músicas nunca termine, sempre executando de forma circular na sequência que está na lista.
+
+Ao término de uma música, a próxima música a ser excutada será aquela que está adiante da música que acabou de terminar na lista exibida, no caso da música executada ser a última a execução dependerá do looping estar ativado. Nesse caso, a música que será executada é a primeira da lista, caso o looping não esteja ativo, a execução encerrará.
