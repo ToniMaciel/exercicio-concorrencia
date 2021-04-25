@@ -11,10 +11,10 @@ public class MusicPlayer {
     public Lock lock = new ReentrantLock(); //Lock que será usado na região critica (lista das músicas)
     public Condition songslistOperation = lock.newCondition();
     public boolean songsListInUse = false; //Para saber se alguma thread está fazendo alguma operação com a lista de reprodução
-    public DefaultListModel<String> songsList = new DefaultListModel<>(); // Lista que possui strings que definem o nome da música e o artista
-    public ArrayList<String> songsListAux = new ArrayList<>();
-    public ArrayList<Integer> duration = new ArrayList<>(); //	Lista que possui as durações das músicas de mesmo indice na lista anterior
-    public ArrayList<Integer> durationAux = new ArrayList<>();
+    public DefaultListModel<String> songsList = new DefaultListModel<>(); // Lista que possui strings que definem o nome da música e o artista na prdem em que serão executas
+    public ArrayList<String> songsListAux = new ArrayList<>(); // Lista que possui strings que definem o nome da música e o artista na ordem que foram inseridas
+    public ArrayList<Integer> duration = new ArrayList<>(); //	Lista que possui as durações das músicas de mesmo indice na lista anterior na prdem em que serão executas
+    public ArrayList<Integer> durationAux = new ArrayList<>(); //	Lista que possui as durações das músicas de mesmo indice na lista anterior na ordem que foram inseridas
 
     /*
     * Essa é a classe usada para adicionar uma música à lista de reprodução.
@@ -60,9 +60,9 @@ public class MusicPlayer {
     }
 
     /*
-    * Essa é a classe usada para imprimir a lista de reprodução. 
+    * Essa é a classe usada para embaralhar a ordem de execução das músicas na lista. 
     * A lógica dessa thread para evitar a condição de corrida é a mesma comentada na thread de adição
-    * com exceção, claro, de que essa apenas lista as músicas que estão na lista de reprodução.
+    * com exceção, claro, de que as threads dessa classe apenas fazem permutações de forma aleátoria na lista de músicas.
     */
     public class RandomSongThread extends Thread {
 
@@ -102,6 +102,11 @@ public class MusicPlayer {
 
     }
 
+    /*
+    * Essa é a classe usada para fazer com a lista reassuma a ordem de inserções original. 
+    * A lógica dessa thread para evitar a condição de corrida é a mesma comentada na thread de adição
+    * com exceção, claro, de que as threads dessa classe apenas desfazem as permutações feitas na lista de músicas.
+    */
     public class SequentialSongThread extends Thread {
 
         @Override public void run(){

@@ -21,7 +21,7 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 	int idx, progBarIdx = 0;
 	//	Variável auxiliar na definição de tempo de música
 	long songTime = 0;
-	//	Variável auxiliar de controle de botão pause/play (JBUtton stpMusicButton)
+	//	Variáveis auxiliares de controle de botão pause/play(JBUtton stpMusicButton), ao executar um shuffle na lista e na reprodução em looping
 	boolean paused = true, shuffle = false, loop = false;
 	
 
@@ -184,11 +184,7 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 						e1.printStackTrace();
 					}
 					
-					totalTime.setText("0:00");
-					currentTime.setText("0:00");
-					playingSong.setText("Now Playing: None");
-					stpMusicButton.setText("|>");
-					musicProgressBar.setValue(0);
+					resetExecution();
 				}
 				break;
 			case "fwd": //	Executa próxima música de forma circular
@@ -228,43 +224,17 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 				break;
 			case "shu":
 				if(songsList.size() > 0){
-					/*if(!thereIsMusicSelected())
-						shuffleTread(-1);
-					else
-						shuffleTread(idx);	*/
-						
-					String aux = (String)musicTitlesList.getSelectedValue();
-					progressBarUpdate.cancel(true);
+					String aux = (String)musicTitlesList.getSelectedValue(); // Pega o nome da música em execução
 					shuffleTread();
-					try {
-						Thread.sleep(5);
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
-					}
-					shuffle = true;
-					idx = songsList.indexOf(aux);
-					musicTitlesList.setSelectedIndex(idx);
-					shuffle = false;
-
-
+					selectMusicInExecutionBefore(aux);
 				}	
 				break;
 			case "ser":
 				if(songsList.size() > 0){				
-					String aux = (String)musicTitlesList.getSelectedValue();
-					progressBarUpdate.cancel(true);
+					String aux = (String)musicTitlesList.getSelectedValue(); // Pega o nome da música em execução
 					sequentialTread();
-					try {
-						Thread.sleep(5);
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
-					}
-					shuffle = true;
-					idx = songsList.indexOf(aux);
-					musicTitlesList.setSelectedIndex(idx);
-					shuffle = false;
+					selectMusicInExecutionBefore(aux);
 				}
-				
 				break;
 			case "loop":
 				loop = !loop;
@@ -272,37 +242,37 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 				if (loop) 
 					looping.setText("Looping: Enable");
 				else 
-					looping.setText("Looping: Disable");
-				
+					looping.setText("Looping: Disable");				
 				break;
 		}
 	}
 
+	
+	
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-
-		if(shuffle){
-			if(!paused)
-				callProgBar();
-		} else {
+		
+		if(shuffle)
+			shuffle = false;
+		else { // Caso o valor selecioando não tenha mudado em virtude do shuffle na lista
 			if(thereIsMusicSelected()){ //Verifica se o valor trocado é uma música da lista (Pode ser null caso remova a primeira música da lista, pois idx fica -1)
 				idx = musicTitlesList.getSelectedIndex();
-	
+				
 				startNewMusic();
 			}	
 		}
-
-
+		
+		
 	}
-
+	
 	private boolean thereIsMusicSelected() {
 		return musicTitlesList.getSelectedValue() != null;
 	}
-
+	
 	private void selectNewMusic() {
 		musicTitlesList.setSelectedIndex(idx);
 	}
-
+	
 	/**
 	 * 	Seta as variavéis necessárias para inicialização da música selecionada, como reinicialização do tempo de execução e da progressBar
 	 * 	bem como altera o botão de play/pause, a label que indica a música atual e o tempo total para sua execução.
@@ -318,58 +288,75 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 		playingSong.setText("Now Playing: " + songsList.get(idx));
 		totalTime.setText(timeToString(duration.get(idx)));
 		callProgBar();
-			
+		
 	}
-
+	
 	//	Thread resposável por executar a música, alterando a progressBar e o tempo atual de execução da música
 	private void callProgBar() {
-
+		
 		if (!progressBarUpdate.isDone())
-			progressBarUpdate.cancel(true);
-
+		progressBarUpdate.cancel(true);
+		
 		progressBarUpdate = new SwingWorker<Object, Object>() {
-
+			
 			@Override
 			protected Object doInBackground() throws Exception {
 				while (progBarIdx <= 100 && !isCancelled()) {
 					musicProgressBar.setValue(progBarIdx);
-
+					
 					long now = System.currentTimeMillis();
 					while (System.currentTimeMillis() < now + 10 * duration.get(idx))
-						currentTime.setText(timeToString((int)(System.currentTimeMillis() + songTime - now)/1000));
+					currentTime.setText(timeToString((int)(System.currentTimeMillis() + songTime - now)/1000));
 					
 					songTime += 10 * duration.get(idx);
 					progBarIdx++;
 				}
-
+				
 				if(!isCancelled()){
-					if(loop){
+					if(loop){ // Caso o loop esteja em execução, toca a próxima música de forma circular
 						idx = (idx + 1) % songsList.size();
 						selectNewMusic();
-					} else{
+					} else{ // Caso contrário, executa a próxima música na sequência ou finaliza as execuções
 						if(idx < songsList.getSize() - 1){
 							idx++;
 							selectNewMusic();
-						} else {
-							musicTitlesList.clearSelection();
-							totalTime.setText("0:00");
-							currentTime.setText("0:00");
-							playingSong.setText("Now Playing: None");
-							musicProgressBar.setValue(0);
-							stpMusicButton.setText("|>");
-						}
+						} else
+							resetExecution();
 					}
 				}
-
+				
 				return 0;
 			}
-
+			
 		};
 		progressBarUpdate.execute();
 	}
-
+	
 	private String timeToString(int time){
 		return String.format("%d:%02d", time/60, time%60);
 	}
-
+	
+	// Reseta alguns elementos da GUI que exibiam informações de execução, como progressBar, list, labels, etc.
+	private void resetExecution() {
+		musicTitlesList.clearSelection();
+		totalTime.setText("0:00");
+		currentTime.setText("0:00");
+		playingSong.setText("Now Playing: None");
+		stpMusicButton.setText("|>");
+		musicProgressBar.setValue(0);
+	}
+	
+	// Seleciona na lista a música que estava em execução antes de aplicar as mudanças na ordem de execução na lista
+	private void selectMusicInExecutionBefore(String musicName) {
+		try {
+			Thread.sleep(5);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+		
+		shuffle = true;
+		
+		idx = songsList.indexOf(musicName); // O novo indíce da música que estava em execução quando foi dado o shuffle
+		musicTitlesList.setSelectedIndex(idx); // Seleciona novamente a música que estava em execução
+	}
 }
