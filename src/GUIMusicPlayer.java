@@ -72,6 +72,20 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 		addMusicButton.setActionCommand("add");
 		addMusicButton.setBounds(380, 100, 60, 40);
 
+		//-------------------------------------
+			songsList.addElement("01-01");
+			/*songsList.addElement("02-01");
+			songsList.addElement("03-01");
+			songsList.addElement("04-01");
+			songsList.addElement("05-01");*/
+
+			duration.add(15);
+			duration.add(15);
+			duration.add(15);
+			duration.add(15);
+			duration.add(15);
+		//-------------------------------------
+
 		musicTitlesList = new JList();
 		musicTitlesList.setModel(songsList);
 		musicTitlesList.addListSelectionListener(this);
@@ -145,14 +159,24 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 				break;
 			case "fwd": //	Executa próxima música de forma circular
 				if(thereIsMusicSelected()){
-					idx = (idx + 1) % songsList.size();
-					selectNewMusic();
+					if(songsList.getSize() == 1){
+						musicTitlesList.clearSelection();
+						musicTitlesList.setSelectedIndex(0);
+					} else {
+						idx = (idx + 1) % songsList.size();
+						selectNewMusic();
+					}
 				}
 				break;
 			case "bck": // Executa música anterior de forma circular
 				if(thereIsMusicSelected()){
-					idx = (idx + songsList.size() - 1) % songsList.size();
-					selectNewMusic();
+					if(songsList.getSize() == 1){
+						musicTitlesList.clearSelection();
+						musicTitlesList.setSelectedIndex(0);
+					} else {
+						idx = (idx + songsList.size() - 1) % songsList.size();
+						selectNewMusic();
+					}
 				}
 				break;
 			case "stp":
