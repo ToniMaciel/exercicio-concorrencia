@@ -22,12 +22,12 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 	//	Variável auxiliar na definição de tempo de música
 	long songTime = 0;
 	//	Variável auxiliar de controle de botão pause/play (JBUtton stpMusicButton)
-	boolean paused = true, shuffle = false;
+	boolean paused = true, shuffle = false, loop = false;
 	
 
 	//	Inicializa os componentes do JavaSwing
 	private JButton addMusicButton, fwdMusicButton, stpMusicButton, bckMusicButton, rmvMusicButton, shuMusicButton, seqMusicButton;
-	private JLabel playingSong, currentTime, totalTime;
+	private JLabel playingSong, currentTime, totalTime, looping;
 	private JList musicTitlesList;
 	private JProgressBar musicProgressBar;
 	private JFrame frame;
@@ -55,22 +55,22 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 		bckMusicButton = new JButton("<<");
 		bckMusicButton.addActionListener(this);
 		bckMusicButton.setActionCommand("bck");
-		bckMusicButton.setBounds(20, 100, 60, 40);
+		bckMusicButton.setBounds(20, 100, 60, 25);
 
 		stpMusicButton = new JButton("|>");
 		stpMusicButton.addActionListener(this);
 		stpMusicButton.setActionCommand("stp");
-		stpMusicButton.setBounds(85, 100, 50, 40);
+		stpMusicButton.setBounds(85, 100, 50, 25);
 
 		fwdMusicButton = new JButton(">>");
 		fwdMusicButton.addActionListener(this);
 		fwdMusicButton.setActionCommand("fwd");
-		fwdMusicButton.setBounds(140, 100, 60, 40);
+		fwdMusicButton.setBounds(140, 100, 60, 25);
 
 		addMusicButton = new JButton("ADD");
 		addMusicButton.addActionListener(this);
 		addMusicButton.setActionCommand("add");
-		addMusicButton.setBounds(380, 100, 60, 40);
+		addMusicButton.setBounds(380, 100, 60, 25);
 
 		//-------------------------------------
 			songsList.addElement("01-01");
@@ -104,22 +104,25 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 		
 		JScrollPane scrollPane = new JScrollPane(musicTitlesList);
 		scrollPane.setViewportView(musicTitlesList);
-		scrollPane.setBounds(20, 150, 420, 110);
+		scrollPane.setBounds(20, 135, 420, 95);
+
+		looping = new JLabel("Looping: Disable");
+		looping.setBounds(20, 230, 420, 25);
 
 		shuMusicButton = new JButton("Shuffle");
 		shuMusicButton.addActionListener(this);
 		shuMusicButton.setActionCommand("shu");
-		shuMusicButton.setBounds(20, 270, 75, 40);
+		shuMusicButton.setBounds(20, 265, 75, 25);
 
 		seqMusicButton = new JButton("Serial");
 		seqMusicButton.addActionListener(this);
 		seqMusicButton.setActionCommand("ser");
-		seqMusicButton.setBounds(100, 270, 75, 40);
+		seqMusicButton.setBounds(100, 265, 75, 25);
 
 		rmvMusicButton = new JButton("RMV");
 		rmvMusicButton.addActionListener(this);
 		rmvMusicButton.setActionCommand("rmv");
-		rmvMusicButton.setBounds(380, 270, 60, 40);
+		rmvMusicButton.setBounds(380, 265, 60, 25);
 
 		JPanel panel = new JPanel();
 		panel.setLayout(null);
@@ -132,6 +135,7 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 		panel.add(fwdMusicButton);
 		panel.add(addMusicButton);
 		panel.add(scrollPane);
+		panel.add(looping);
 		panel.add(shuMusicButton);
 		panel.add(seqMusicButton);
 		panel.add(rmvMusicButton);
@@ -139,7 +143,7 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 		frame = new JFrame();
 		frame.add(panel);
 		frame.setTitle("MusicPlayer");
-		frame.setSize(480, 360);
+		frame.setSize(480, 340);
 		frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		frame.setVisible(true);
 	}
