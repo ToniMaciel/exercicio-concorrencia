@@ -74,10 +74,10 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 
 		//-------------------------------------
 			songsList.addElement("01-01");
-			/*songsList.addElement("02-01");
+			songsList.addElement("02-01");
 			songsList.addElement("03-01");
 			songsList.addElement("04-01");
-			songsList.addElement("05-01");*/
+			songsList.addElement("05-01");
 
 			duration.add(15);
 			duration.add(15);
@@ -251,6 +251,20 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 					
 					songTime += 10 * duration.get(idx);
 					progBarIdx++;
+				}
+
+				if(!isCancelled()){
+					if(idx < songsList.getSize() - 1){
+						idx++;
+						selectNewMusic();
+					} else {
+						musicTitlesList.clearSelection();
+						totalTime.setText("0:00");
+						currentTime.setText("0:00");
+						playingSong.setText("Now Playing: None");
+						musicProgressBar.setValue(0);
+						stpMusicButton.setText("|>");
+					}
 				}
 
 				return 0;
