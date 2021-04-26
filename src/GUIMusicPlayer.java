@@ -275,13 +275,16 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 			
 			@Override
 			protected Object doInBackground() throws Exception {
-				while (progBarIdx <= 100 && !isCancelled()) {
+				while (progBarIdx <= 100) {
 					musicProgressBar.setValue(progBarIdx);
 					
 					long now = System.currentTimeMillis();
-					while (System.currentTimeMillis() < now + 10 * duration.get(idx))
-					currentTime.setText(timeToString((int)(System.currentTimeMillis() + songTime - now)/1000));
+					while (System.currentTimeMillis() < now + 10 * duration.get(idx) && !isCancelled())
+						currentTime.setText(timeToString((int)(System.currentTimeMillis() + songTime - now)/1000));
 					
+					if (isCancelled())
+						break;
+
 					songTime += 10 * duration.get(idx);
 					progBarIdx++;
 				}
