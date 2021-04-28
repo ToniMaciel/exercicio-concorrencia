@@ -18,7 +18,7 @@ import javax.swing.event.ListSelectionListener;
 public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListSelectionListener, WindowConstants {
 
 	//	idx guarda o valor do indice na lista da música que está em execução e progBarIdx guarda o valor que a musicProgressBar possui
-	int idx, progBarIdx = 0;
+	int idx;
 	//	Variável auxiliar na definição de tempo de música
 	long songTime = 0;
 	//	Variáveis auxiliares de controle de botão pause/play(JBUtton stpMusicButton), ao executar um shuffle na lista e na reprodução em looping
@@ -193,7 +193,7 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 				else{
 					stpMusicButton.setText("||");
 					if (thereIsMusicSelected()) //Só dá paly em uma música, se houver alguma selecionada
-						callProgBar();
+						callProgBar(false);
 				}
 				break;
 			case "shu":
@@ -255,40 +255,39 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 	private void startNewMusic() {
 		
 		paused = false;
-		songTime = 0;
-		progBarIdx = 0;
 		musicProgressBar.setValue(0);
 		stpMusicButton.setText("||");
 		playingSong.setText("Now Playing: " + songsList.get(idx));
 		totalTime.setText(timeToString(duration.get(idx)));
-		callProgBar();
+		callProgBar(true);
 		
 	}
 	
 	//	Thread resposável por executar a música, alterando a progressBar e o tempo atual de execução da música
-	private void callProgBar() {
+	private void callProgBar(boolean newMusic) {
 		
 		if (!progressBarUpdate.isDone())
-		progressBarUpdate.cancel(true);
+			progressBarUpdate.cancel(true);
+		
+		if (newMusic){
+			try {
+				Thread.sleep(5);
+			} catch (InterruptedException e) {}
+			songTime = 0;
+		}
 		
 		progressBarUpdate = new SwingWorker<Object, Object>() {
 			
 			@Override
 			protected Object doInBackground() throws Exception {
-				while (progBarIdx <= 100) {
-					musicProgressBar.setValue(progBarIdx);
-					
-					long now = System.currentTimeMillis();
-					while (System.currentTimeMillis() < now + 10 * duration.get(idx) && !isCancelled())
-						currentTime.setText(timeToString((int)(System.currentTimeMillis() + songTime - now)/1000));
-					
-					if (isCancelled())
-						break;
+				long startTime = System.currentTimeMillis() - songTime;
 
-					songTime += 10 * duration.get(idx);
-					progBarIdx++;
+				while (!isCancelled() && songTime < 1000 * duration.get(idx)) {
+					musicProgressBar.setValue((int)songTime / (10 * duration.get(idx)));
+					currentTime.setText(timeToString((int)songTime/1000));
+					songTime = System.currentTimeMillis() - startTime;
 				}
-				
+
 				if(!isCancelled()){
 					if(loop){ // Caso o loop esteja em execução, toca a próxima música de forma circular
 						idx = (idx + 1) % songsList.size();
