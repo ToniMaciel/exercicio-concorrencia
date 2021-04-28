@@ -269,18 +269,18 @@ public class GUIMusicPlayer extends MusicPlayer implements ActionListener, ListS
 	private void callProgBar() {
 		
 		if (!progressBarUpdate.isDone())
-		progressBarUpdate.cancel(true);
+			progressBarUpdate.cancel(true);
 		
 		progressBarUpdate = new SwingWorker<Object, Object>() {
 			
 			@Override
 			protected Object doInBackground() throws Exception {
-				while (progBarIdx <= 100) {
+				musicProgressBar.setMaximum(duration.get(idx));
+				while (progBarIdx <= musicProgressBar.getMaximum() && !isCancelled()) {
 					musicProgressBar.setValue(progBarIdx);
 					
-					long now = System.currentTimeMillis();
-					while (System.currentTimeMillis() < now + 10 * duration.get(idx) && !isCancelled())
-						currentTime.setText(timeToString((int)(System.currentTimeMillis() + songTime - now)/1000));
+					currentTime.setText(timeToString(progBarIdx));
+					Thread.sleep(1000);
 					
 					if (isCancelled())
 						break;
